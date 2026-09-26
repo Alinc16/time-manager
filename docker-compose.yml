@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # 1. Database Konteyneri
+  db:
+    image: postgres:15-alpine
+    container_name: time_manager_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: time_manager_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      # Veri kalıcılığı (Data Persistence) için volume tanımı
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Backend (Elixir/Phoenix) Konteyneri
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: time_manager_backend
+    restart: always
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgrespassword
+      DATABASE_NAME: time_manager_dev
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+    driver: local
